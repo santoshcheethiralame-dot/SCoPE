@@ -18,6 +18,13 @@ def designed_family(cover: Iterable[str], threshold: int) -> tuple[frozenset[str
     return tuple(frozenset(combo) for combo in combinations(tuple(cover), threshold))
 
 
+def necessary_family(causal_ids: Iterable[str], synergy_pairs: Iterable[Iterable[str]] = ()) -> tuple[frozenset[str], ...]:
+    """The responsible-set family for a real (un-designed) case: singleton necessary sets — the
+    leave-one-out causal passages — plus any jointly-necessary pairs a leave-two-out probe found.
+    The pairs are what give the no-single-cause coalitions a finite nonconformity at all."""
+    return tuple(frozenset({cid}) for cid in causal_ids) + tuple(frozenset(pair) for pair in synergy_pairs)
+
+
 def set_covers(candidate: Iterable[str] | None, family: Iterable[frozenset[str]]) -> bool:
     """The set-coverage predicate: does the returned set contain a sufficient set?"""
     if candidate is None:

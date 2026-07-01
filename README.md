@@ -20,6 +20,8 @@ non-circular oracle, model backends, prompts, and data.
   joint support = positive; `interaction_order` feeds the extractor
 - `src/scope/designed.py` — designed-truth metrics: the set-coverage predicate and the
   designed-vs-behavioral comparison
+- `src/scope/conformal.py` — split-conformal attribution sets: prefix-depth nonconformity over a
+  sufficient-set family; the culprit-rank score is the size-1 corner
 - `src/scope/testbed.py` — synthetic coalition games (OR / AND / k-of-n / arbitrary formula) whose
   causal structure is known analytically
 - `src/scope/model_game.py` — the real game over a lineup scenario and backend
