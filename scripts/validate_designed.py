@@ -4,12 +4,14 @@ For every wrong case, enumerate the exact minimal sufficient sets on the live mo
 --max-size) and compare them to what the construction planted: how often behavior matches the
 design exactly, how often the designed sets at least suffice, and how often the error turns out
 parametric. Cells built before designed truth existed are retrofitted from their recipes (the
-OR-covers); AND cells ship a designed.jsonl.
+OR-covers); AND cells ship a designed.jsonl. Writes one validation.jsonl row per case — verdicts
+plus the enumerated sets — so per-case analyses re-run on CPU without touching the model again.
 
     python scripts/validate_designed.py --cell runs/hotpotqa/and/qwen \\
         --model Qwen/Qwen2.5-7B-Instruct --load-in-4bit --max-size 3
 """
 import argparse
+import json
 from pathlib import Path
 
 from lineup.data.coalition import from_recipe, read_designed
@@ -44,25 +46,38 @@ def main() -> None:
 
     model = TransformersModel(args.model, load_in_4bit=args.load_in_4bit)
 
+    out = args.cell / "validation.jsonl"
     tallies: dict = {}
-    for index, generation in enumerate(wrong):
-        scenario, planted = scenarios.get(generation.qid), designed.get(generation.qid)
-        if scenario is None or planted is None:
-            continue
-        game = scenario_game(model, scenario, generation.model_answer)
-        verdict = compare(
-            analyze(game, max_size=args.max_size),
-            designed_family(planted.cover_chunk_ids, planted.threshold),
-        )
-        bucket = tallies.setdefault(
-            planted.structure, {"n": 0, "exact": 0, "designed_sufficient": 0, "parametric": 0, "queries": 0}
-        )
-        bucket["n"] += 1
-        bucket["queries"] += game.queries
-        for key in ("exact", "designed_sufficient", "parametric"):
-            bucket[key] += int(verdict[key])
-        if (index + 1) % 10 == 0:
-            print(f"[{index + 1}/{len(wrong)}]", flush=True)
+    with out.open("w", encoding="utf-8") as handle:
+        for index, generation in enumerate(wrong):
+            scenario, planted = scenarios.get(generation.qid), designed.get(generation.qid)
+            if scenario is None or planted is None:
+                continue
+            game = scenario_game(model, scenario, generation.model_answer)
+            structure = analyze(game, max_size=args.max_size)
+            verdict = compare(structure, designed_family(planted.cover_chunk_ids, planted.threshold))
+            record = {
+                "qid": generation.qid,
+                "structure": planted.structure,
+                "max_size": args.max_size,
+                "exact": verdict["exact"],
+                "designed_sufficient": verdict["designed_sufficient"],
+                "parametric": verdict["parametric"],
+                "minimal_sufficient": [sorted(subset) for subset in structure.minimal_sufficient],
+                "queries": game.queries,
+            }
+            handle.write(json.dumps(record, ensure_ascii=False) + "\n")
+            bucket = tallies.setdefault(
+                planted.structure, {"n": 0, "exact": 0, "designed_sufficient": 0, "parametric": 0, "queries": 0}
+            )
+            bucket["n"] += 1
+            bucket["queries"] += game.queries
+            for key in ("exact", "designed_sufficient", "parametric"):
+                bucket[key] += int(verdict[key])
+            if (index + 1) % 10 == 0:
+                print(f"[{index + 1}/{len(wrong)}]", flush=True)
+
+    print(f"\nwrote {out}")
 
     for structure, t in sorted(tallies.items()):
         n = t["n"] or 1

@@ -12,12 +12,15 @@ Five arms per wrong case, each on a fresh game so budgets are honest:
                  baseline; enumerates the lattice, so its query bill is the full 2^n)
 
 Reports, per arm: sufficient-set rate, designed-set coverage (set_covers), mean set size, mean
-queries. The coverage-vs-budget comparison is the seed of the efficiency figure.
+queries. The coverage-vs-budget comparison is the seed of the efficiency figure. Writes one
+extraction.jsonl row per case and arm — the extracted subset itself, so paired arm-vs-arm tests
+and coverage under any other family re-run on CPU without touching the model again.
 
     python scripts/run_extraction.py --cell runs/hotpotqa/and/qwen \\
         --model Qwen/Qwen2.5-7B-Instruct --load-in-4bit --n-samples 48
 """
 import argparse
+import json
 from pathlib import Path
 
 from _cells import load_cases
@@ -52,36 +55,51 @@ def main() -> None:
     model = TransformersModel(args.model, load_in_4bit=args.load_in_4bit)
     budget = args.budget or None
 
+    out = args.cell / "extraction.jsonl"
     tallies = {arm: {"n": 0, "sufficient": 0, "covered": 0, "size": 0, "queries": 0} for arm in args.arms}
-    for index, case in enumerate(cases):
-        for arm in args.arms:
-            if arm == "contextcite" and case.ranking is None:
-                continue
-            game = scenario_game(model, case.scenario, case.model_answer)
-            if arm == "presented":
-                result = grow_prune(game, order=list(game.ids), budget=budget)
-            elif arm == "contextcite":
-                result = grow_prune(game, order=case.ranking, budget=budget)
-            elif arm == "interaction":
-                effects = sampled_effects(game, n_samples=args.n_samples, seed=args.seed)
-                result = grow_prune(game, order=interaction_order(effects), budget=budget)
-            elif arm == "beam":
-                effects = sampled_effects(game, n_samples=args.n_samples, seed=args.seed)
-                result = surrogate_beam(game, effects, budget=budget)
-            elif arm == "shapley":
-                values = exact_shapley(game) if len(game.ids) <= 12 else sampled_shapley(game, seed=args.seed)
-                result = grow_prune(game, order=ranking(values), budget=budget)
-            else:
-                result = shrink(game, order=case.ranking or case.presented, budget=budget)
+    with out.open("w", encoding="utf-8") as handle:
+        for index, case in enumerate(cases):
+            for arm in args.arms:
+                if arm == "contextcite" and case.ranking is None:
+                    continue
+                game = scenario_game(model, case.scenario, case.model_answer)
+                if arm == "presented":
+                    result = grow_prune(game, order=list(game.ids), budget=budget)
+                elif arm == "contextcite":
+                    result = grow_prune(game, order=case.ranking, budget=budget)
+                elif arm == "interaction":
+                    effects = sampled_effects(game, n_samples=args.n_samples, seed=args.seed)
+                    result = grow_prune(game, order=interaction_order(effects), budget=budget)
+                elif arm == "beam":
+                    effects = sampled_effects(game, n_samples=args.n_samples, seed=args.seed)
+                    result = surrogate_beam(game, effects, budget=budget)
+                elif arm == "shapley":
+                    values = exact_shapley(game) if len(game.ids) <= 12 else sampled_shapley(game, seed=args.seed)
+                    result = grow_prune(game, order=ranking(values), budget=budget)
+                else:
+                    result = shrink(game, order=case.ranking or case.presented, budget=budget)
 
-            bucket = tallies[arm]
-            bucket["n"] += 1
-            bucket["sufficient"] += int(result.sufficient)
-            bucket["covered"] += int(set_covers(result.subset, case.family))
-            bucket["size"] += len(result.subset) if result.subset else 0
-            bucket["queries"] += game.queries
-        if (index + 1) % 10 == 0:
-            print(f"[{index + 1}/{len(cases)}]", flush=True)
+                covered = set_covers(result.subset, case.family)
+                record = {
+                    "qid": case.scenario.qid,
+                    "arm": arm,
+                    "family": args.family,
+                    "sufficient": result.sufficient,
+                    "covered": covered,
+                    "subset": sorted(result.subset) if result.subset else [],
+                    "queries": game.queries,
+                }
+                handle.write(json.dumps(record, ensure_ascii=False) + "\n")
+                bucket = tallies[arm]
+                bucket["n"] += 1
+                bucket["sufficient"] += int(result.sufficient)
+                bucket["covered"] += int(covered)
+                bucket["size"] += len(result.subset) if result.subset else 0
+                bucket["queries"] += game.queries
+            if (index + 1) % 10 == 0:
+                print(f"[{index + 1}/{len(cases)}]", flush=True)
+
+    print(f"\nwrote {out}")
 
     for arm in args.arms:
         t = tallies[arm]
