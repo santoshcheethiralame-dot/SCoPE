@@ -32,6 +32,8 @@ class CaseData:
     ranking: list | None     # contextcite score order; None when no prediction exists
     margin: float            # contextcite top1 - top2 score, the confidence signal
     family: tuple            # target sufficient/necessary sets; empty = uncoverable
+    interaction: list | None = None   # scope order-2 interaction order, when a GPU orders.jsonl exists
+    shapley: list | None = None       # exact/sampled shapley order, likewise
 
 
 def _synergy_pairs(cell: Path) -> dict:
@@ -95,6 +97,16 @@ def load_cases(cell: Path, family_mode: str) -> list[CaseData]:
                 ranked[0].score - ranked[1].score if len(ranked) >= 2 else 0.0
             )
 
+    # SCoPE's own orders (interaction / shapley), when a GPU run logged them; the interaction
+    # order is the coalition-aware ranking the conformal guarantee is really meant to use.
+    orders: dict = {}
+    orders_path = cell / "orders.jsonl"
+    if orders_path.exists():
+        for line in orders_path.read_text(encoding="utf-8").splitlines():
+            if line.strip():
+                record = json.loads(line)
+                orders[record["qid"]] = record
+
     cases = []
     for generation in wrong:
         scenario, family = scenarios.get(generation.qid), families.get(generation.qid)
@@ -111,6 +123,8 @@ def load_cases(cell: Path, family_mode: str) -> list[CaseData]:
                 ranking=rankings.get(generation.qid),
                 margin=margins.get(generation.qid, 0.0),
                 family=family,
+                interaction=orders.get(generation.qid, {}).get("interaction"),
+                shapley=orders.get(generation.qid, {}).get("shapley"),
             )
         )
     return cases

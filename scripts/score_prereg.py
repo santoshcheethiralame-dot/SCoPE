@@ -76,17 +76,24 @@ def main() -> None:
             print(f"H2  pending — natural cell missing {', '.join(needed)}")
         else:
             cases = load_cases(args.natural_cell, "mscs")
-            items = [depth_item(c.key, c.ranking, c.family) for c in cases if c.ranking is not None]
-            for split in h2_coverage(items, alpha=args.alpha, seeds=tuple(args.seeds)):
-                if "coverage" not in split:
-                    print(f"H2  seed={split['seed']}  no data")
+            # Score the conformal guarantee under every ranking on disk. contextcite is the
+            # order-1 baseline; interaction/shapley appear once a GPU orders.jsonl is present —
+            # the interaction order is the coalition-aware ranking H2 is really about.
+            arms = [("contextcite", "ranking"), ("interaction", "interaction"), ("shapley", "shapley")]
+            for arm, attr in arms:
+                items = [depth_item(c.key, getattr(c, attr), c.family) for c in cases if getattr(c, attr)]
+                if not items:
                     continue
-                tau = "inf" if split["tau"] == float("inf") else f"{split['tau']:.0f}"
-                print(
-                    f"H2  {_verdict(split['passed'])}  seed={split['seed']}  coverage {split['coverage']:.2f} "
-                    f"(target {split['target']:.2f} - 2SE {split['slack']:.2f})  "
-                    f"mean-size {split['mean_size']:.1f} <= 4  tau={tau}  n_test={split['n_test']}"
-                )
+                for split in h2_coverage(items, alpha=args.alpha, seeds=tuple(args.seeds)):
+                    if "coverage" not in split:
+                        print(f"H2[{arm}]  seed={split['seed']}  no data")
+                        continue
+                    tau = "inf" if split["tau"] == float("inf") else f"{split['tau']:.0f}"
+                    print(
+                        f"H2[{arm:11s}] {_verdict(split['passed'])}  seed={split['seed']}  "
+                        f"coverage {split['coverage']:.2f} (target {split['target']:.2f} - 2SE {split['slack']:.2f})  "
+                        f"mean-size {split['mean_size']:.1f} <= 4  tau={tau}  n_test={split['n_test']}"
+                    )
 
         if _missing(args.natural_cell, "roles.jsonl"):
             print("H5  pending — no roles.jsonl in the natural cell")
