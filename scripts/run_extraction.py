@@ -8,6 +8,8 @@ Five arms per wrong case, each on a fresh game so budgets are honest:
   beam         — the same surrogate proposes candidate sets, verified best-first, then pruned
   shrink       — ddmin-style block removal from the full context, ContextCite order as the
                  drop priority when available (anytime: budget cuts cost minimality, not sufficiency)
+  shapley      — grow-prune ranked by the exact Shapley value (the additive game-theoretic
+                 baseline; enumerates the lattice, so its query bill is the full 2^n)
 
 Reports, per arm: sufficient-set rate, designed-set coverage (set_covers), mean set size, mean
 queries. The coverage-vs-budget comparison is the seed of the efficiency figure.
@@ -19,12 +21,13 @@ import argparse
 from pathlib import Path
 
 from _cells import load_cases
+from scope.baselines import exact_shapley, ranking, sampled_shapley
 from scope.designed import designed_family, set_covers
 from scope.extract import grow_prune, shrink, surrogate_beam
 from scope.interactions import interaction_order, sampled_effects
 from scope.model_game import scenario_game
 
-ARMS = ("presented", "contextcite", "interaction", "beam", "shrink")
+ARMS = ("presented", "contextcite", "interaction", "beam", "shrink", "shapley")
 
 
 def main() -> None:
@@ -65,6 +68,9 @@ def main() -> None:
             elif arm == "beam":
                 effects = sampled_effects(game, n_samples=args.n_samples, seed=args.seed)
                 result = surrogate_beam(game, effects, budget=budget)
+            elif arm == "shapley":
+                values = exact_shapley(game) if len(game.ids) <= 12 else sampled_shapley(game, seed=args.seed)
+                result = grow_prune(game, order=ranking(values), budget=budget)
             else:
                 result = shrink(game, order=case.ranking or case.presented, budget=budget)
 
