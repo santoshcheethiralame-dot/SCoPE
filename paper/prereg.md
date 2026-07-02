@@ -57,3 +57,10 @@ cases with recorded support-determination violations (violation rate reported).
 - Registered before the first chain-split or enumeration artifact existed. (Analyses of the
   pre-existing 12-cell benchmark matrix and the natural slice predate this file and are
   exploratory context, cited as such.)
+- 2026-07-03 — first artifacts scored (hotpotqa natural qwen+phi; AND cells qwen/phi/mistral;
+  musique AND qwen). Registered verdicts: H1 pass (0.93 / 0.90); H2 holds at alpha=0.2 but not
+  0.1 on the ContextCite order (the interaction order is not yet logged); H3a borderline
+  (0.27–0.61), H3b fail in all five cells, H4 fail on the designed target, H5 fail with a
+  ~70% support-determination violation rate. No thresholds changed. Post-hoc analyses
+  (behavioral-coverage rejoin of the extraction rows, violation characterization, decision-rule
+  on the mscs family) are exploratory and labelled as such in first_results.md.
