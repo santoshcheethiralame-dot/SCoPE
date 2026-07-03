@@ -138,6 +138,18 @@ p=0.909, n=37) — the designed arm ends as a clean, fully-instrumented negative
 family structure is stable: irreducibly-shared responsibility 0.34 (0.37 at bound-3),
 hierarchy violated 0.55 (0.51).
 
+## Risk-controlled selection — the singleton is undeployable at low error (2026-07-03, exploratory)
+
+Framing single-passage attribution as selection (commit to the top-ranked passage; a false
+answer is one that is not a sufficient cause), pooled over 341 wrong cases: the naive
+false-answer rate is 0.43, and **no confidence gating on the ContextCite margin pushes the
+singleton error below ~0.28-0.34.** A conformal-risk-control threshold therefore abstains
+entirely at alpha = 0.1 and 0.2, first commits at alpha ~ 0.3 (~20% answered), and reaches ~85%
+answered only at alpha ~ 0.4. So a practitioner who needs a low error on one blamed passage must
+abstain or switch to the calibrated set (which meets alpha = 0.1 by coverage) — the
+deployment-flavored restatement of the thesis. See `paper/selective.md`; the FDR/eBH variant is
+stricter still and selects nothing on this weak signal.
+
 ## What remains to run
 
 Only robustness breadth: the grid fillers and seed replications (W-wave). The preregistered
