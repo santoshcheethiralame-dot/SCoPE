@@ -15,8 +15,8 @@ import random
 from pathlib import Path
 
 from _cells import load_cases
-from scope.conformal import depth_item
-from scope.decide import calibrate_rule, calibrate_stratified_rules, evaluate_rule, evaluate_stratified
+from dragnet.conformal import depth_item
+from dragnet.decide import calibrate_rule, calibrate_stratified_rules, evaluate_rule, evaluate_stratified
 
 
 def main() -> None:

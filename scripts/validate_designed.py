@@ -17,9 +17,9 @@ from pathlib import Path
 from lineup.data.coalition import from_recipe, read_designed
 from lineup.data.serialization import read_generations, read_scenarios
 
-from scope.designed import compare, designed_family
-from scope.model_game import scenario_game
-from scope.mscs import analyze
+from dragnet.designed import compare, designed_family
+from dragnet.model_game import scenario_game
+from dragnet.mscs import analyze
 
 
 def main() -> None:

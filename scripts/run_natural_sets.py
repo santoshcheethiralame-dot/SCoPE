@@ -19,7 +19,7 @@ from pathlib import Path
 
 from lineup.data.serialization import read_predictions, read_roles, read_scenarios
 
-from scope.conformal import calibrate_depth, coverage_and_size, depth_item
+from dragnet.conformal import calibrate_depth, coverage_and_size, depth_item
 
 
 def main() -> None:

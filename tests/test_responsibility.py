@@ -1,5 +1,5 @@
-from scope.responsibility import case_responsibilities, max_responsibility, responsibility
-from scope.spectrum import hierarchy_holds, moebius_from_family, unsupported_terms
+from dragnet.responsibility import case_responsibilities, max_responsibility, responsibility
+from dragnet.spectrum import hierarchy_holds, moebius_from_family, unsupported_terms
 
 
 def f(*sets):

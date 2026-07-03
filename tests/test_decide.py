@@ -1,8 +1,8 @@
 import math
 import random
 
-from scope.conformal import DepthItem, calibrate_depth
-from scope.decide import (
+from dragnet.conformal import DepthItem, calibrate_depth
+from dragnet.decide import (
     DecisionRule,
     calibrate_rule,
     calibrate_stratified_rules,

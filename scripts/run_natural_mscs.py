@@ -19,8 +19,8 @@ from pathlib import Path
 
 from lineup.data.serialization import read_generations, read_scenarios
 
-from scope.model_game import scenario_game
-from scope.mscs import minimal_sufficient_sets
+from dragnet.model_game import scenario_game
+from dragnet.mscs import minimal_sufficient_sets
 
 
 def monotonicity_violations(game, max_size: int) -> int:

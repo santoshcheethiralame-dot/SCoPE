@@ -1,8 +1,8 @@
 from lineup.backends.base import Generation, LanguageModel, Scoring
 from lineup.data.schema import Chunk, Recipe, Scenario
 
-from scope import analyze
-from scope.model_game import scenario_game
+from dragnet import analyze
+from dragnet.model_game import scenario_game
 
 
 class FakeModel(LanguageModel):

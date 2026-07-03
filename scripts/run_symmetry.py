@@ -15,7 +15,7 @@ from pathlib import Path
 
 from lineup.data.serialization import read_roles, read_scenarios
 
-from scope.symmetry import case_symmetry, symmetry_rates
+from dragnet.symmetry import case_symmetry, symmetry_rates
 
 THRESHOLDS = (0.4, 0.5, 0.6, 0.7, 0.8, 0.9)
 

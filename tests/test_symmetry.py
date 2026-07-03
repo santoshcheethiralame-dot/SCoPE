@@ -1,6 +1,6 @@
 from types import SimpleNamespace
 
-from scope.symmetry import case_symmetry, near_duplicate_pairs, similarity, symmetry_rates
+from dragnet.symmetry import case_symmetry, near_duplicate_pairs, similarity, symmetry_rates
 
 
 def chunk(cid, text):

@@ -18,7 +18,7 @@ from pathlib import Path
 from lineup.data.coalition import from_recipe, read_designed
 from lineup.data.serialization import read_generations, read_predictions, read_roles, read_scenarios
 
-from scope.designed import designed_family, necessary_family
+from dragnet.designed import designed_family, necessary_family
 
 
 @dataclass
@@ -32,7 +32,7 @@ class CaseData:
     ranking: list | None     # contextcite score order; None when no prediction exists
     margin: float            # contextcite top1 - top2 score, the confidence signal
     family: tuple            # target sufficient/necessary sets; empty = uncoverable
-    interaction: list | None = None   # scope order-2 interaction order, when a GPU orders.jsonl exists
+    interaction: list | None = None   # dragnet order-2 interaction order, when a GPU orders.jsonl exists
     shapley: list | None = None       # exact/sampled shapley order, likewise
 
 
@@ -97,7 +97,7 @@ def load_cases(cell: Path, family_mode: str) -> list[CaseData]:
                 ranked[0].score - ranked[1].score if len(ranked) >= 2 else 0.0
             )
 
-    # SCoPE's own orders (interaction / shapley), when a GPU run logged them; the interaction
+    # DRAGNET's own orders (interaction / shapley), when a GPU run logged them; the interaction
     # order is the coalition-aware ranking the conformal guarantee is really meant to use.
     orders: dict = {}
     orders_path = cell / "orders.jsonl"

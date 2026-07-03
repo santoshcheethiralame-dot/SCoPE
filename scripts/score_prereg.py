@@ -16,8 +16,8 @@ from pathlib import Path
 from lineup.data.serialization import read_roles, read_scenarios
 
 from _cells import load_cases
-from scope.conformal import depth_item
-from scope.prereg import (
+from dragnet.conformal import depth_item
+from dragnet.prereg import (
     h1_small_sets,
     h2_coverage,
     h3_designed_sufficient,

@@ -4,10 +4,10 @@ from lineup.backends.base import Generation, LanguageModel, Scoring
 from lineup.data.coalition import ChainSplitScenarioBuilder
 from lineup.data.schema import Chunk, QAExample
 
-from scope import analyze, grow_prune
-from scope.interactions import exact_effects, interaction_order, sampled_effects
-from scope.model_game import scenario_game
-from scope.testbed import and_game, formula_game, or_game
+from dragnet import analyze, grow_prune
+from dragnet.interactions import exact_effects, interaction_order, sampled_effects
+from dragnet.model_game import scenario_game
+from dragnet.testbed import and_game, formula_game, or_game
 
 
 def test_exact_effects_split_redundancy_from_synergy():

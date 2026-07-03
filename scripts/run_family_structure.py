@@ -14,8 +14,8 @@ import argparse
 import json
 from pathlib import Path
 
-from scope.responsibility import max_responsibility
-from scope.spectrum import moebius_from_family, unsupported_terms
+from dragnet.responsibility import max_responsibility
+from dragnet.spectrum import moebius_from_family, unsupported_terms
 
 
 def main() -> None:

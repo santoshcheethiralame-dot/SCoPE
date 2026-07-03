@@ -25,7 +25,7 @@ from pathlib import Path
 from lineup.stats import percentile_interval
 
 from _cells import load_cases
-from scope.conformal import calibrate_depth, coverage_and_size, depth_item, top1_coverage
+from dragnet.conformal import calibrate_depth, coverage_and_size, depth_item, top1_coverage
 
 
 def _coverage_interval(test, tau, n_boot: int, rng: random.Random):

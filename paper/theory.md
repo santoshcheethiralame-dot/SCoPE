@@ -1,4 +1,4 @@
-# SCoPE — the theory spine
+# DRAGNET — the theory spine
 
 Five results, each with the experiment that measures its premise and the observation that would
 refute it. The discipline throughout, learned the hard way: never sell an arithmetic identity as

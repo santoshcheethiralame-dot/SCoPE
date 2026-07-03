@@ -1,5 +1,5 @@
-from scope import analyze, is_necessary, is_sufficient, minimal_necessary_sets, minimal_sufficient_sets
-from scope.testbed import and_game, formula_game, k_of_n_game, or_game, parametric_game
+from dragnet import analyze, is_necessary, is_sufficient, minimal_necessary_sets, minimal_sufficient_sets
+from dragnet.testbed import and_game, formula_game, k_of_n_game, or_game, parametric_game
 
 
 def test_or_redundancy_is_loo_blind():

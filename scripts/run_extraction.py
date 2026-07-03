@@ -24,11 +24,11 @@ import json
 from pathlib import Path
 
 from _cells import load_cases
-from scope.baselines import exact_shapley, ranking, sampled_shapley
-from scope.designed import designed_family, set_covers
-from scope.extract import grow_prune, shrink, surrogate_beam
-from scope.interactions import interaction_order, sampled_effects
-from scope.model_game import scenario_game
+from dragnet.baselines import exact_shapley, ranking, sampled_shapley
+from dragnet.designed import designed_family, set_covers
+from dragnet.extract import grow_prune, shrink, surrogate_beam
+from dragnet.interactions import interaction_order, sampled_effects
+from dragnet.model_game import scenario_game
 
 ARMS = ("presented", "contextcite", "interaction", "beam", "shrink", "shapley")
 

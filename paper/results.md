@@ -1,4 +1,4 @@
-# SCoPE results
+# DRAGNET results
 
 Regenerate: `python scripts/build_results.py --root <path-to-cells>`
 

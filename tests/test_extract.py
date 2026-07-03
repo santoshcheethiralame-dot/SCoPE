@@ -1,8 +1,8 @@
-from scope import analyze, grow_prune
-from scope.extract import shrink, surrogate_beam
-from scope.interactions import exact_effects, sampled_effects
-from scope.mscs import is_sufficient
-from scope.testbed import and_game, formula_game, or_game, parametric_game
+from dragnet import analyze, grow_prune
+from dragnet.extract import shrink, surrogate_beam
+from dragnet.interactions import exact_effects, sampled_effects
+from dragnet.mscs import is_sufficient
+from dragnet.testbed import and_game, formula_game, or_game, parametric_game
 
 
 def test_prune_recovers_a_supporter_from_a_bad_order():

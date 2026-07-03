@@ -3,7 +3,7 @@ requires = ["setuptools>=68", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "scope"
+name = "dragnet"
 version = "0.0.1"
 description = "Set-valued causal attribution for retrieval-augmented generation: minimal sufficient coalitions, extracted under a query budget."
 readme = "README.md"

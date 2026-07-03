@@ -15,8 +15,8 @@ from pathlib import Path
 from lineup.data.serialization import read_roles, read_scenarios
 
 from _cells import load_cases
-from scope.conformal import depth_item
-from scope.prereg import (
+from dragnet.conformal import depth_item
+from dragnet.prereg import (
     h1_small_sets,
     h2_coverage,
     h3_designed_sufficient,
@@ -177,7 +177,7 @@ def main() -> None:
     natural = sorted(p for p in args.root.glob("*/natural/*") if (p / "scenarios.jsonl").exists())
     designed = sorted(p for p in args.root.glob("*/and/*") if (p / "scenarios.jsonl").exists())
 
-    lines = ["# SCoPE results", "", "Regenerate: `python scripts/build_results.py --root <path-to-cells>`", ""]
+    lines = ["# DRAGNET results", "", "Regenerate: `python scripts/build_results.py --root <path-to-cells>`", ""]
     lines += natural_table(natural, args.bootstrap) + [""]
     lines += conformal_table(natural, tuple(args.alphas), tuple(args.seeds)) + [""]
     lines += h5_table(natural) + [""]

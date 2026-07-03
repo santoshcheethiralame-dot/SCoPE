@@ -1,4 +1,4 @@
-"""Log SCoPE's own candidate orders per case, so the conformal guarantee can be scored offline
+"""Log DRAGNET's own candidate orders per case, so the conformal guarantee can be scored offline
 against the method's ranking — not just ContextCite's.
 
 The prereg H2 wraps split-conformal around a passage ranking. Until now the only ranking on disk
@@ -18,9 +18,9 @@ from pathlib import Path
 
 from lineup.data.serialization import read_generations, read_scenarios
 
-from scope.baselines import exact_shapley, ranking, sampled_shapley
-from scope.interactions import interaction_order, sampled_effects
-from scope.model_game import scenario_game
+from dragnet.baselines import exact_shapley, ranking, sampled_shapley
+from dragnet.interactions import interaction_order, sampled_effects
+from dragnet.model_game import scenario_game
 
 
 def main() -> None:

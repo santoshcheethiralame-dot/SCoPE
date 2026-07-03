@@ -1,7 +1,7 @@
 import random
 
-from scope.conformal import DepthItem, calibrate_depth, coverage_and_size, depth_item, required_depth, top1_coverage
-from scope.designed import necessary_family
+from dragnet.conformal import DepthItem, calibrate_depth, coverage_and_size, depth_item, required_depth, top1_coverage
+from dragnet.designed import necessary_family
 
 
 def test_necessary_family_gives_coalitions_a_finite_depth():

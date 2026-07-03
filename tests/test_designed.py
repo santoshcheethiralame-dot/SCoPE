@@ -3,9 +3,9 @@ from lineup.data.coalition import ChainSplitScenarioBuilder, from_recipe
 from lineup.data.scenario import ScenarioBuilder
 from lineup.data.schema import Chunk, QAExample
 
-from scope import analyze
-from scope.designed import compare, designed_family, set_covers
-from scope.model_game import scenario_game
+from dragnet import analyze
+from dragnet.designed import compare, designed_family, set_covers
+from dragnet.model_game import scenario_game
 
 AND_POOL = {"year": [], "number": [], "entity": ["Antwerp", "Rotterdam"]}
 OR_POOL = {"year": [], "number": [], "entity": ["Alexandre Bartholdi", "Henri Banks"]}

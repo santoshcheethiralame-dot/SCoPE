@@ -1,7 +1,7 @@
 from types import SimpleNamespace
 
-from scope.conformal import depth_item
-from scope.prereg import (
+from dragnet.conformal import depth_item
+from dragnet.prereg import (
     h1_small_sets,
     h2_coverage,
     h3_designed_sufficient,

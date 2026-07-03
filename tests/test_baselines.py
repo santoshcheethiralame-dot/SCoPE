@@ -1,9 +1,9 @@
 from pytest import approx
 
-from scope import grow_prune
-from scope.baselines import exact_banzhaf, exact_shapley, exact_shapley_interaction, ranking, sampled_shapley
-from scope.interactions import exact_effects
-from scope.testbed import and_game, formula_game, or_game
+from dragnet import grow_prune
+from dragnet.baselines import exact_banzhaf, exact_shapley, exact_shapley_interaction, ranking, sampled_shapley
+from dragnet.interactions import exact_effects
+from dragnet.testbed import and_game, formula_game, or_game
 
 
 def test_shapley_axioms_on_the_or_cover():
