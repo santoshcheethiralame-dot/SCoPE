@@ -59,6 +59,7 @@ Regenerate: `python scripts/build_results.py --root <path-to-cells>`
 
 | cell | H3a designed-sufficient | H3b link vs distractor silent | H4 beam vs contextcite (designed target) |
 |---|---|---|---|
+| 2wiki/and/mistral | 0.42 [0.30, 0.55] (n=60) | 0.61 vs 0.51 (fail) | 0.45 vs 0.45, p=1.000 (n=11) |
 | 2wiki/and/qwen | pending (run log) | 0.40 vs 0.27 (fail) | pending |
 | hotpotqa/and/mistral | 0.50 [0.33, 0.67] (n=30) | 0.50 vs 0.52 (fail) | 0.20 vs 0.25, p=0.741 (n=20) |
 | hotpotqa/and/phi | pending (run log) | 0.41 vs 0.42 (fail) | pending |
