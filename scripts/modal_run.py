@@ -24,7 +24,9 @@ image = (
     .apt_install("git")
     .run_commands(
         "git clone --depth 1 https://github.com/santoshcheethiralame-dot/LINEUP /root/lineup",
-        "git clone --depth 1 https://github.com/santoshcheethiralame-dot/DRAGNET /root/dragnet",
+        # the code repo is still named SCoPE on GitHub (DRAGNET rename pending); this URL works now
+        # and redirects to DRAGNET automatically once renamed, so it is correct in both states.
+        "git clone --depth 1 https://github.com/santoshcheethiralame-dot/SCoPE /root/dragnet",
         "pip install -e '/root/lineup[gpu]'",
         "pip install --no-deps -e /root/dragnet",
         "pip install -U 'bitsandbytes>=0.46.1'",
