@@ -57,6 +57,35 @@ with the context, so the guarantee is relatively tighter at depth. alpha=0.1 sta
 this order (the interaction-order test is pending). H5 again fails under the violation rate
 (0.42 on n=12 clean cases).
 
+## Full natural grid — scored 2026-07-03 (all three orders per cell)
+
+**H1 passes in every cell of the grid.** Small-set rate: qwen/hotpotqa 0.93, phi/hotpotqa 0.90,
+qwen k=10 0.93, **mistral/hotpotqa 0.72 [0.60, 0.83]**, qwen/musique 0.92 [0.85, 0.97],
+qwen/2wiki 0.95 [0.90, 0.99]. Mistral is the honest low end: 28% of its errors have no
+sufficient set within size 3 — its problem is reach, not ambiguity.
+
+**Ambiguity is stable ~0.5 for qwen across datasets** (hotpotqa 0.52, k=10 0.52, musique 0.54,
+2wiki 0.52); mistral 0.38. **A3 violations pervasive everywhere**: mistral 0.48, qwen/hotpotqa
+0.69, musique 0.70, 2wiki 0.80.
+
+**H2, pooled over the three orders-bearing cells (227 items):**
+
+- alpha=0.1 — **tau=inf for every order.** The coverage ceiling is the family's reach:
+  27/227 (11.9%) non-parametric cases have no set within the size-3 bound, capping coverage
+  at 0.88 < 0.90. At this enumeration bound the 90% guarantee is unreachable by ANY ranking —
+  Prop 4 as measured fact, driven by mistral (15/53 no-set).
+- alpha=0.2 — the coalition-aware orders buy set size: interaction/shapley tau=3 (cov
+  0.81–0.89) vs contextcite tau=4. A 25% smaller set at equal coverage; shapley and
+  interaction are comparable (shapley slightly steadier per-cell: 2wiki tau=3, musique tau=4).
+
+So the ranking helps at the margin; the binding constraint is enumeration depth. The direct
+lever: re-enumerate mscs at max_size 5 (63 vs 42 queries/case at k=6) to lift the ceiling
+toward ~0.95 and retest alpha=0.1.
+
+**H5 fails in all new cells too** (0.40 / 0.45 / 0.56) with violation exclusions dominating
+(28 / 70 / 80 cases) — Thm 1 holds only in its approximate form; report the violation rate as
+a first-class quantity.
+
 ## What remains to run
 
 Natural cells (pipeline + mscs + orders) for mistral/hotpotqa, qwen/musique, qwen/2wiki;
