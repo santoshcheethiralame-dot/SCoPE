@@ -159,9 +159,12 @@ ceiling (coverage 0.77-0.89, tau=inf) on every dataset. Mistral is the consisten
 boundary: it has small sufficient sets less often, and where it lacks them the guarantee
 correctly abstains.
 
-**Seed replication (qwen/hotpotqa, the headline cell):** H1 seed0 0.96 [0.90,1.0] / seed2 1.00;
-ambiguity 0.54 / 0.59. The result is stable across seeds; seed1 (W5) will complete the >=3-seed
-set. (results (3)(1).zip was a redundant re-download of the k=10 cell, not scored.)
+**Seed replication (qwen/hotpotqa, the headline cell) -- COMPLETE 3-seed set:** every pillar
+replicates. H1 seed0/1/2 = 0.96 [0.90,1.0] / 0.99 [0.96,1.0] / 1.00; ambiguity 0.54/0.62/0.59;
+A3 0.77/0.80/0.79; and the guarantee H2[shapley] alpha=0.1 passes 3/3 seeded splits on EVERY
+seed (coverage 0.89-1.00). The headline holds across three independent seeds -- the >=3-seeds
+discipline is satisfied on the headline cell, the guarantee across 9/9 seeded splits.
+(results (3)(1).zip was a redundant re-download of the k=10 cell, not scored.)
 
 ## What remains to run
 
