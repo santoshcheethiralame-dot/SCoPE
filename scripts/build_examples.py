@@ -11,10 +11,20 @@ candidates per fate; the author hand-picks and trims for the paper.
 """
 import argparse
 import json
+import re
 from itertools import combinations
 from pathlib import Path
 
 from lineup.data.serialization import read_generations, read_scenarios
+
+# Refusal-type wrong answers ("not mentioned", "unknown") are degenerate for family semantics —
+# any gold-free subset reproduces them — so they make misleading specimens; skipped here and
+# stratified out in the disjointness analysis (they are 5% of wrong cases).
+REFUSAL = re.compile(
+    r"not (mentioned|specified|provided|stated|given|available)|no information|unknown"
+    r"|cannot (be )?determin|insufficient",
+    re.I,
+)
 
 
 def main() -> None:
@@ -34,6 +44,8 @@ def main() -> None:
             row = json.loads(line)
             scenario = scenarios.get(row["qid"])
             if scenario is None:
+                continue
+            if REFUSAL.search(answers.get(row["qid"], "")):
                 continue
             members = [frozenset(s) for s in row["minimal_sufficient"] if s]
             if row["parametric"]:

@@ -3,7 +3,7 @@
 Hand-pick one per fate for the paper box; trim passage text as needed. Sorted by
 question length (shortest first) so the cleanest specimens lead.
 
-## culprit  (131 candidates)
+## culprit  (130 candidates)
 
 **2wiki/natural/qwen · 844fe30c0bda11eba7f7acde48001122**
 - Q: Where did Giacomo Feo's wife die?
@@ -23,16 +23,7 @@ question length (shortest first) so the cleanest specimens lead.
 - sufficient family: {Dana MacDuff}
   - [Dana MacDuff] He was born in Pasadena, California, to the actor Tyler MacDuff and the former Beverlie May Anderson (born 1930), who divorced in 1961. He is named for his father's close friend, the actor Dana Andrews. He graduated in 1...
 
-## disjoint coalition  (143 candidates)
-
-**musique/natural/qwen · 2hop__728887_159109**
-- Q: Where is Assomada located?
-- gold: central Atlantic Ocean   ·   model answered: Not mentioned
-- sufficient family: {Royal Oaks Country Club} | {RTC (Cape Verde)} | {Larraul} | {Republic of the Congo}
-  - [Royal Oaks Country Club] Royal Oaks Country Club is a country club and subdivision in Houston, Texas, United States in the Alief community. The country club is located at 2910 Royal Oaks Club Drive, west of The Galleria. Sunrise Colony Company d...
-  - [RTC (Cape Verde)] The station also broadcasts news, sports, television shows and recently broadcasts football or soccer coverages from Portugal and also from Brazil as well as Latin America but rarely around the world. The radio channel i...
-  - [Larraul] Larraul is a town and municipality located in the province of Gipuzkoa, in the autonomous community of Basque Country, northern Spain.
-  - [Republic of the Congo] The capital, Brazzaville, is located on the Congo River, in the south of the country, immediately across from Kinshasa, the capital of the Democratic Republic of the Congo.
+## disjoint coalition  (124 candidates)
 
 **musique/natural/qwen · 2hop__256553_617289**
 - Q: Who is the uncle of Liu Bin?
@@ -51,7 +42,18 @@ question length (shortest first) so the cleanest specimens lead.
   - [Mary, mother of Jesus] Mary resided in "her own house"[Lk.1:56] in Nazareth in Galilee, possibly with her parents, and during her betrothal — the first stage of a Jewish marriage — the angel Gabriel announced to her that she was to be the moth...
   - [Mary, mother of Jesus] According to the apocryphal Gospel of James, Mary was the daughter of Saint Joachim and Saint Anne. Before Mary's conception, Anne had been barren and was far advanced in years. Mary was given to service as a consecrated...
 
-## holistic  (46 candidates)
+**musique/natural/qwen · 2hop__497191_129669**
+- Q: In which district was Alhandra born?
+- gold: Lisbon District   ·   model answered: Lisbon
+- sufficient family: {Vila Franca de Xira} | {Alhandra (footballer), Ulrich Walser House, Westboro, Wisconsin} | {Kentucky State Capitol, Alhandra (footballer), Ulrich Walser House} | {Alhandra (footballer), Hilda Crosby Standish, Ulrich Walser House}
+  - [Vila Franca de Xira] Vila Franca de Xira () is a municipality in the Lisbon District in Portugal. The population in 2011 was 136,886, in an area of 318.19 km². Situated on both banks of the Tagus River, 32 km north-east of the Portuguese cap...
+  - [Ulrich Walser House] The Ulrich Walser House is a house located at 711 North 2nd Street in Alma, Wisconsin, United States. It was constructed in 1895 by Ulrich Walser and was placed on the National Register of Historic Places in 1982.
+  - [Alhandra (footballer)] Luís Miguel Assunção Joaquim (born 5 March 1979 in Vila Franca de Xira, Lisbon), known as Alhandra, is a Portuguese retired footballer who played mainly as a left back – he could also appear as a midfielder.
+  - [Westboro, Wisconsin] Westboro is a town in Taylor County, Wisconsin, United States. The population was 660 at the 2000 census. The census-designated place of Westboro is located in the town. The unincorporated community of Queenstown is also...
+  - [Kentucky State Capitol] The Kentucky State Capitol is located in Frankfort and is the house of the three branches (executive, legislative, judicial) of the state government of the Commonwealth of Kentucky. The building is listed on the National...
+  - [Hilda Crosby Standish] Hilda Crosby Standish (1902 – June 1, 2005) was a pioneer in the birth control movement in the state of Connecticut. In 1935, she became medical director of the Maternal Health Center in Hartford, the state's first birth...
+
+## holistic  (42 candidates)
 
 **2wiki/natural/mistral · ea1fc06c0bda11eba7f7acde48001122**
 - Q: Where does Karin Stoltenberg's husband work at?

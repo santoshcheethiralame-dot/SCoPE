@@ -204,6 +204,15 @@ alpha=0.1): coverage 0.86-0.96 in all six directions - musique->anything at 0.96
 hotpotqa/2wiki (tau=3) slightly under-cover musique (0.86), the harder dataset wanting the
 larger tau. Calibrate-once-deploy-anywhere holds to within a passage.
 
+## Refusal stratification — the disjointness confound, found and sized (2026-07-04)
+
+Refusal-type wrong answers ("not mentioned", "unknown"; 25/467 = 5% of evaluable cases) are
+degenerate under family semantics: any gold-free subset reproduces them, so they carry inflated
+ambiguity (0.84) and disjointness (0.76). Excluding them the headline barely moves: **ambiguity
+0.61 -> 0.60, fully-disjoint 0.31 -> 0.28 on substantive wrong answers (n=442).** Report the
+stratified number; the specimen extractor skips refusals. (Caught by our own worked-example
+inspection - the first auto-picked coalition specimen was a refusal case.)
+
 ## What remains to run
 
 Only robustness breadth: the grid fillers and seed replications (W-wave). The preregistered
