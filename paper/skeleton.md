@@ -21,7 +21,15 @@ Traceback). Target: ICLR 2027 (arXiv early for priority).
 | Escape survives depth | MSS size flat k=6→10 vs necessary 0.45k | `fig_depth.png` |
 | Interaction hierarchy fails | 51–55% of cases violate it (pure-synergy terms) | `spectrum.py`; `first_results.md` |
 | Support is non-monotone (A3) | 48–80% violating; median 9 pairs | `fig_a3.png` |
-| Frontier-scale holds | gpt-oss-120b H1 = ⟨landing⟩ | `run_frontier_mscs.py` output |
+| Frontier-scale holds | gpt-oss-120b: H1 0.97 [0.91,1.00]; ambiguity 0.48–0.50; disjoint 0.30; A3 0.72; parametric 0.28 (3× small models — contamination scales, structure doesn't) | `results.md` frontier row |
+| **Guarantee survives live retrieval (BM25)** | H1 0.99 [0.96,1.00]; interaction 3/3 seeds PASS (τ=4/4/2, cov 0.94/0.94/0.83); structure identical (ambiguity 0.52, disjoint 0.29) | `results.md` qwenbm25 rows; `fig_robustness.png` |
+| Grid complete, H1 everywhere | 9/9 cells 0.72–0.99 + frontier + BM25, all PASS ≥0.50 | `fig_robustness.png` (F5) |
+| Achieved τ sits at the oracle floor | perfect-ranking floor τ*=3 (cov 0.91–0.94); achieved 3–4 | family-analytics oracle-τ |
+| Disjoint explanations, with CIs | 0.31 [0.27,0.35] fully disjoint; comparison-questions hotspot 0.47 vs bridge 0.29; refusal-stratified 0.28 | family-analytics; refusal strat |
+| Singleton attribution has a risk floor | selective risk never below ~0.28 at any coverage; the set reaches α=0.1, no singleton can | `fig_selective.png`; `selective.py` |
+| Sets are necessary, not just sufficient | removal flips the answer 0.73–0.87 (PN, point-identified); repairs to gold ~0.20 | removal rows; ch3 `pn_ps.py` (scope call: light-touch here, full PN/PS framing in Ch3) |
+| Guarantee travels across datasets | τ-transfer coverage 0.86–0.96 in all 6 directions | `run_deployment.py` |
+| Extraction is budget-efficient | grow reaches equal coverage in 3–6 queries vs shapley 64 | `run_deployment.py` budget frontier |
 | Set-repair beats top-1 | 34% vs 6% on no-culprit slice | LINEUP rebuttal B2 |
 | Additive methods are blind | OR & AND both give φ=½; only order-2 splits them | `baselines.py`; `test_baselines.py` |
 
@@ -82,9 +90,20 @@ Traceback). Target: ICLR 2027 (arXiv early for priority).
   rate from an independent instrument. `fig_responsibility.png`. *Cite:* Chockler–Halpern.
 - **5.6 A3 — support is non-monotone.** 48–80%; reframes Thm 1; motivates distribution-free.
   `fig_a3.png`. *Cite:* distraction/entrainment (2505.18761, 2606.24077) — aggregate vs lattice.
-- **5.7 Frontier slice.** gpt-oss-120b MSCS enumeration — H1 ⟨landing⟩. The no-one-else-has-this.
-- **5.8 Downstream + honest negatives.** set-repair 34% vs 6%; the designed-arm negative
-  (H3/H4 fail, behavioral coverage 0.93–1.0 = the plant fails not the extractor); H5.
+- **5.7 Frontier slice.** gpt-oss-120b MSCS enumeration — H1 0.97, every structural constant
+  replicates (ambiguity, disjointness, shared responsibility, A3); parametric 0.28 = 3× small
+  models. The no-one-else-has-this. `results.md` frontier row.
+- **5.8 Realism: the guarantee under live retrieval.** BM25-retrieved (not oracle-planted)
+  contexts: H1 0.99, interaction 3/3 seeds PASS, structure unchanged. Kills the
+  synthetic-distractor objection. `fig_robustness.png` (F5: 9/9 grid + frontier + BM25).
+- **5.9 The singleton risk floor + necessity.** No confidence gating commits one passage below
+  ~0.28 false-answer (`fig_selective.png`); removing the smallest sufficient set flips the answer
+  0.73–0.87 (necessity) but repairs only ~0.20 — the set is real and the plurality is real.
+- **5.10 Deployment.** τ-transfer 0.86–0.96 across all dataset pairs; grow = 3–6 queries vs
+  shapley 64 at equal coverage; the unified singleton/set/abstain rule with Mondrian strata.
+- **5.11 Downstream + honest negatives.** set-repair 34% vs 6%; the designed-arm negative
+  (H3/H4 fail, behavioral coverage 0.93–1.0 = the plant fails not the extractor); H5;
+  refusals = 5% of cases, stratified (disjoint 0.31→0.28 substantive-only, finding survives).
 
 ## §6 Related work (positioning table — every ✓ in our row stays exclusive)
 | method | per-source | interaction | set-valued | coverage guarantee | causal/error | query-eff |
@@ -102,13 +121,25 @@ Traceback). Target: ICLR 2027 (arXiv early for priority).
 
 ## §7 Limitations
 - A3 non-monotonicity → Thm 1 approximate (disclosed, measured, first-class).
-- Mistral reach boundary → abstention, not universal coverage.
+- Mistral reach boundary → abstention, not universal coverage — and 1−μ *predicts* the observed
+  ceilings on all four reach-limited cells (0.78/0.77–0.79 etc.): the ceiling is a property of the
+  (model, dataset) error mix, not the method.
 - Designed-construction instrument weak (honest negative, fully instrumented).
 - Enumeration bounded (size ≤5); frontier at bound-3 for cost.
+- Coverage target is "hits any family member" — the strict single-member (Monte-Carlo) treatment
+  stays valid at τ=5 vs our τ=3: ambiguity handling trades size, never validity (App B).
+  *Cite:* conformal under ambiguous ground truth (2307.09302).
 
 ## Appendices
-- A: prereg (`prereg.md`) + dated status log. B: frozen numbers + CIs. C: repro (one-command
-  `build_results.py` / `build_figures.py`, seeds, anonymized mirror). D: NeurIPS checklist.
+- A: prereg (`prereg.md`) + dated status log. B: frozen numbers + CIs + Monte-Carlo-conformal
+  robustness. C: repro (one-command `build_results.py` / `build_figures.py`, seeds, anonymized
+  mirror). D: qualitative fates gallery (`examples.md`: 130 culprit / 124 disjoint / 42 holistic /
+  51 parametric specimens). E: NeurIPS checklist.
+
+## Figures (final inventory, all generated)
+`fig_guarantee` (F1 headline) · `fig_robustness` (F5: grid+frontier+BM25 heatmap) · `fig_pareto`
+(F3) · `fig_selective` (N5 risk floor) · `fig_responsibility` (N1) · `fig_a3` (N4) · `fig_depth`
+(N3) · spectrum/hierarchy (N2, data ready — build at write time if wanted).
 
 ---
 ## Citation anchor list (verify venue/year at write time; re-run lit sweep pre-submission)
