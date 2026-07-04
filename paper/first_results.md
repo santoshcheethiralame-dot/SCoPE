@@ -213,6 +213,17 @@ ambiguity (0.84) and disjointness (0.76). Excluding them the headline barely mov
 stratified number; the specimen extractor skips refusals. (Caught by our own worked-example
 inspection - the first auto-picked coalition specimen was a refusal case.)
 
+## The frontier slice — gpt-oss-120B, exact enumeration over a free API (2026-07-04)
+
+47 wrong cases enumerated at bound-3, generation-only game on the Cerebras free tier (zero GPU,
+zero cost, checkpointed overnight run). **Every structural constant replicates at 120B:**
+H1 0.97 [0.91, 1.00]; ambiguity 0.48-0.50; fully-disjoint explanations 0.30; irreducibly-shared
+responsibility 0.30; A3 violations 0.72. **The one number that moves is parametric errors:
+0.28 vs 0.03-0.11 for the small models on the same dataset** - the frontier model reproduces
+its wrong answers with no context three times more often, i.e. contamination/parametric error
+scales with capacity while the attribution structure does not. The structure of RAG error is
+scale-invariant from 3.8B to 120B; only its parametric share grows.
+
 ## What remains to run
 
 Only robustness breadth: the grid fillers and seed replications (W-wave). The preregistered
