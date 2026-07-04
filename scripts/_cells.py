@@ -89,7 +89,10 @@ def load_cases(cell: Path, family_mode: str) -> list[CaseData]:
         families = {qid: necessary_family(ids, synergy.get(qid, ())) for qid, ids in causal.items()}
 
     rankings, margins = {}, {}
-    for prediction in read_predictions(cell / "predictions.jsonl"):
+    # frontier/API cells carry no predictions.jsonl (logprob methods cannot run there);
+    # their cases simply have no contextcite ranking or margin.
+    predictions = read_predictions(cell / "predictions.jsonl") if (cell / "predictions.jsonl").exists() else []
+    for prediction in predictions:
         if prediction.method == "contextcite":
             ranked = sorted(prediction.chunk_scores, key=lambda s: s.score, reverse=True)
             rankings[prediction.qid] = [score.chunk_id for score in ranked]
