@@ -22,9 +22,13 @@ context is a genuine top-30, written in the standard scenarios/generations forma
 later stage can rerun on it. An existing cell is reused, which makes an interrupted run
 resumable at the probe.
 
-    python scripts/run_largek_probe.py --cell runs/hotpotqa/largek30/qwen \\
-        --dataset hotpotqa --k 30 --limit 400 \\
-        --model Qwen/Qwen2.5-7B-Instruct --load-in-4bit
+    python scripts/run_largek_probe.py --cell runs/hotpotqa/largek20/qwen \\
+        --dataset hotpotqa --k 20 --limit 400 \\
+        --model Qwen/Qwen2.5-7B-Instruct --device-map auto
+
+k = 20 is the largest depth that fits two 16 GB cards: a 30-passage prefill overflows the
+activation budget even with an fp16 model sharded across both, so shard (--device-map) and
+keep k at or below 20 on a dual-T4, or move to a larger GPU for deeper contexts.
 """
 import argparse
 import json
@@ -134,7 +138,9 @@ def main() -> None:
     parser.add_argument("--dataset", default="hotpotqa", help="hotpotqa, 2wiki, or musique")
     parser.add_argument("--split", default="validation")
     parser.add_argument("--limit", type=int, default=400, help="source questions to draw")
-    parser.add_argument("--k", type=int, default=30, help="retrieval depth of the built contexts")
+    parser.add_argument("--k", type=int, default=20,
+                        help="retrieval depth of the built contexts (20 is the dual-T4 ceiling; "
+                             "a 30-passage prefill OOMs even sharded fp16)")
     parser.add_argument("--model", default=DEFAULT_MODEL)
     parser.add_argument("--load-in-4bit", action="store_true")
     parser.add_argument(
