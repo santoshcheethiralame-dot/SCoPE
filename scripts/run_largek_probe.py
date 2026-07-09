@@ -26,9 +26,11 @@ resumable at the probe.
         --dataset hotpotqa --k 20 --limit 400 \\
         --model Qwen/Qwen2.5-7B-Instruct --device-map auto
 
-k = 20 is the largest depth that fits two 16 GB cards: a 30-passage prefill overflows the
-activation budget even with an fp16 model sharded across both, so shard (--device-map) and
-keep k at or below 20 on a dual-T4, or move to a larger GPU for deeper contexts.
+On a 16 GB card, run 4-bit (--load-in-4bit): the weights are ~5.5 GB, leaving room for the
+~4-6 GB a k=20 prefill needs, and it is far faster than an fp16 model sharded across two cards
+(which pays a cross-device transfer at every layer). k=30 overflows even 4-bit here, so k=20 is
+the depth a single T4 sustains; deeper contexts want a larger GPU. Each per-case generation is
+guarded against OOM so one long-tail context is skipped, not fatal.
 """
 import argparse
 import json
@@ -36,6 +38,8 @@ import random
 import time
 from collections import Counter
 from pathlib import Path
+
+import torch
 
 from lineup.config import DEFAULT_MODEL, DEFAULT_SEED, set_seed
 from lineup.correctness import LLMJudge
@@ -113,22 +117,36 @@ def build_cell(args, model) -> tuple[list, list]:
     )
     judge = LLMJudge(model)
 
-    scenarios, generations, skipped = [], [], 0
+    # Only the probe's wrong-case budget is needed, so stop once a small surplus is in hand (some
+    # wrong cases turn out parametric and leave the evaluable pool) instead of generating on every
+    # one of `limit` questions -- at large k each generation is slow, and the build otherwise
+    # dominates the run.
+    target_wrong = args.limit_cases + 15 if args.limit_cases else None
+
+    scenarios, generations, skipped, n_wrong = [], [], 0, 0
     for index, example in enumerate(examples):
         scenario = builder.build(example)
         if scenario is None:
             skipped += 1
             continue
+        try:
+            generation = generate_and_judge(model, scenario, llm_judge=judge)
+        except torch.cuda.OutOfMemoryError:
+            torch.cuda.empty_cache()            # a rare over-long context; skip it, keep the run alive
+            skipped += 1
+            continue
         scenarios.append(scenario)
-        generations.append(generate_and_judge(model, scenario, llm_judge=judge))
+        generations.append(generation)
+        n_wrong += int(not generation.is_correct)
         if (index + 1) % 25 == 0:
-            wrong = sum(1 for g in generations if not g.is_correct)
-            print(f"[build {index + 1}/{len(examples)}] cases {len(scenarios)}  wrong {wrong}", flush=True)
+            print(f"[build {index + 1}/{len(examples)}] cases {len(scenarios)}  wrong {n_wrong}", flush=True)
+        if target_wrong and n_wrong >= target_wrong:
+            print(f"[build] {n_wrong} wrong cases in hand (target {target_wrong}); stopping build", flush=True)
+            break
 
     write_scenarios(args.cell / "scenarios.jsonl", scenarios)
     write_generations(args.cell / "generations.jsonl", generations)
-    wrong = sum(1 for g in generations if not g.is_correct)
-    print(f"built {len(scenarios)} cases at k={args.k} (skipped {skipped}), wrong {wrong}", flush=True)
+    print(f"built {len(scenarios)} cases at k={args.k} (skipped {skipped}), wrong {n_wrong}", flush=True)
     return scenarios, generations
 
 
@@ -195,8 +213,12 @@ def main() -> None:
             scenario = by_qid.get(generation.qid)
             if scenario is None:
                 continue
-            game = scenario_game(model, scenario, generation.model_answer)
-            record = bounded_probe(game, rng, args.nonmono_samples, budget)
+            try:
+                game = scenario_game(model, scenario, generation.model_answer)
+                record = bounded_probe(game, rng, args.nonmono_samples, budget)
+            except torch.cuda.OutOfMemoryError:
+                torch.cuda.empty_cache()        # over-long context: record and move on, don't die
+                record = {"status": "oom", "queries": 0}
             handle.write(json.dumps({"qid": generation.qid, "model_answer": generation.model_answer, **record}) + "\n")
 
             tallies[record["status"]] += 1
@@ -206,6 +228,7 @@ def main() -> None:
                 for key in ("plural", "disjoint", "nonmono"):
                     tallies[key] += record[key]
             if (index + 1) % 10 == 0:
+                torch.cuda.empty_cache()        # keep fragmentation flat across thousands of subset queries
                 n = tallies["ok"]
                 minutes = (time.time() - started) / 60
                 rates = (
@@ -218,8 +241,9 @@ def main() -> None:
 
     n = tallies["ok"]
     print(f"\nwrote {out}")
-    print(f"probed {sum(tallies[s] for s in ('ok', 'parametric', 'budget'))} wrong cases at k={args.k}: "
-          f"evaluable {n}, parametric {tallies['parametric']}, budget-exhausted {tallies['budget']}")
+    print(f"probed {sum(tallies[s] for s in ('ok', 'parametric', 'budget', 'oom'))} wrong cases at k={args.k}: "
+          f"evaluable {n}, parametric {tallies['parametric']}, budget-exhausted {tallies['budget']}, "
+          f"oom-skipped {tallies['oom']}")
     if n:
         print(f"  plural   (two distinct certified sets) >= {tallies['plural'] / n:.2f}   [k=6 grid: 0.45-0.63]")
         print(f"  disjoint (the two share no passage)    >= {tallies['disjoint'] / n:.2f}   [k=6 grid: 0.28]")
