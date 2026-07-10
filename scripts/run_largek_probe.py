@@ -94,7 +94,14 @@ class VLLMModel:
     def generate(self, messages, max_new_tokens=None):
         sp = self.default if max_new_tokens is None else self._SamplingParams(
             temperature=0.0, max_tokens=max_new_tokens)
-        out = self.llm.generate([self._prompt(messages)], sp, use_tqdm=False)
+        try:
+            out = self.llm.generate([self._prompt(messages)], sp, use_tqdm=False)
+        except Exception as exc:
+            # A prompt longer than max_model_len is unevaluable; re-raise as OOM so the per-case
+            # guards skip it rather than crash the run (raise max_model_len to avoid it entirely).
+            if "context length" in str(exc) or "input tokens" in str(exc):
+                raise torch.cuda.OutOfMemoryError(str(exc))
+            raise
         return _Gen(text=out[0].outputs[0].text)
 
 
