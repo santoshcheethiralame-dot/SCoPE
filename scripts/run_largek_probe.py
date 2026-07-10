@@ -37,6 +37,7 @@ import json
 import random
 import time
 from collections import Counter
+from dataclasses import dataclass
 from pathlib import Path
 
 import torch
@@ -58,6 +59,43 @@ from lineup.generation import generate_and_judge
 from dragnet.extract import grow_prune
 from dragnet.model_game import scenario_game
 from dragnet.mscs import is_sufficient
+
+
+@dataclass
+class _Gen:
+    text: str
+    mean_logprob: float = 0.0
+    truncated: bool = False
+
+
+class VLLMModel:
+    """vLLM backend for large k on a single 16 GB card. Paged KV and chunked prefill bound the
+    memory of a long-context prompt, and AWQ 4-bit weights (~4.5 GB) leave the rest for the cache,
+    so k = 50-100 fits where transformers OOMs. Exposes the same .generate(messages) -> object with
+    .text that the probe and the lineup build path expect, so nothing downstream changes."""
+
+    def __init__(self, model_name, *, max_new_tokens=24, max_model_len=8192, quantization="awq",
+                 gpu_memory_utilization=0.90):
+        from transformers import AutoTokenizer
+        from vllm import LLM, SamplingParams
+
+        self._SamplingParams = SamplingParams
+        self.tokenizer = AutoTokenizer.from_pretrained(model_name)
+        self.llm = LLM(model=model_name, quantization=quantization, dtype="float16",
+                       max_model_len=max_model_len, gpu_memory_utilization=gpu_memory_utilization,
+                       enforce_eager=True)
+        self.default = SamplingParams(temperature=0.0, max_tokens=max_new_tokens)
+        self.max_new_tokens = max_new_tokens
+
+    def _prompt(self, messages):
+        payload = [{"role": m.role, "content": m.content} for m in messages]
+        return self.tokenizer.apply_chat_template(payload, add_generation_prompt=True, tokenize=False)
+
+    def generate(self, messages, max_new_tokens=None):
+        sp = self.default if max_new_tokens is None else self._SamplingParams(
+            temperature=0.0, max_tokens=max_new_tokens)
+        out = self.llm.generate([self._prompt(messages)], sp, use_tqdm=False)
+        return _Gen(text=out[0].outputs[0].text)
 
 
 def bounded_probe(game, rng: random.Random, nonmono_samples: int, budget: int) -> dict:
@@ -167,6 +205,15 @@ def main() -> None:
              "precedence over --load-in-4bit. Needed at large k, where a 30-passage prefill "
              "overflows a single 16 GB card in 4-bit.",
     )
+    parser.add_argument(
+        "--backend", default="transformers", choices=["transformers", "vllm"],
+        help="'vllm' uses paged KV + chunked prefill (AWQ weights) to fit k=50-100 on a 16 GB card, "
+             "where the transformers path OOMs on the long prefill.",
+    )
+    parser.add_argument("--max-model-len", type=int, default=8192,
+                        help="vLLM context length; must exceed the prompt (k=50 ~6k tokens, k=100 ~12k).")
+    parser.add_argument("--quantization", default="awq",
+                        help="vLLM weight quantization: awq or gptq (needs a matching checkpoint), or none.")
     parser.add_argument("--max-new-tokens", type=int, default=24)
     parser.add_argument("--seed", type=int, default=DEFAULT_SEED)
     parser.add_argument("--limit-cases", type=int, default=120, help="wrong cases to probe (0 = all)")
@@ -177,7 +224,13 @@ def main() -> None:
     set_seed(args.seed)
     from lineup.backends import TransformersModel
 
-    if args.device_map:
+    if args.backend == "vllm":
+        # Paged KV + chunked prefill fit the long k=50-100 prompt a 16 GB card cannot hold in
+        # transformers; AWQ weights keep the precision change immaterial (Section 8's 4-bit check).
+        model = VLLMModel(args.model, max_new_tokens=args.max_new_tokens,
+                          max_model_len=args.max_model_len,
+                          quantization=(None if args.quantization == "none" else args.quantization))
+    elif args.device_map:
         # A single 16 GB card in 4-bit OOMs on a 30-passage prefill (weights plus the KV cache
         # and activations of a ~3-4k-token context), so shard an fp16 model across both GPUs.
         # The paper's own 4-bit-vs-fp16 check (32 vs 31% no-culprit) makes the precision change
